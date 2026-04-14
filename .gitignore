@@ -1,0 +1,23 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE configurations
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary & log files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Browser cache / local storage (if expanded later)
+*.json
+
+# Python/Node dependencies (if you expand this repo later)
+node_modules/
+__pycache__/
+venv/
