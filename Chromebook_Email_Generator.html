@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromebook Repair Email Generator</title>
+  <style>
+    :root {
+      --bg-main: #121212;
+      --bg-card: #1e1e1e;
+      --bg-input: #2a2a2a;
+      --text-main: #e0e0e0;
+      --text-muted: #aaaaaa;
+      --accent-red: #9a2234;
+      --accent-gold: #feda15;
+      --border-dark: #444;
+    }
+    body { 
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; 
+      max-width: 950px; 
+      margin: 2rem auto; 
+      padding: 0 1rem; 
+      background: var(--bg-main); 
+      color: var(--text-main); 
+    }
+    h2 { 
+      color: var(--accent-gold); 
+      border-bottom: 3px solid var(--accent-red); 
+      padding-bottom: 0.5rem; 
+      margin-top: 0;
+      letter-spacing: 1px;
+    }
+    h3 { color: var(--accent-gold); margin-bottom: 1rem; }
+    
+    .section { 
+      background: var(--bg-card); 
+      padding: 1.5rem; 
+      border-radius: 8px; 
+      margin-bottom: 1.5rem; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+      border-left: 5px solid var(--accent-red);
+    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-muted); }
+    
+    input, select { 
+      padding: 0.6rem; 
+      border: 1px solid var(--border-dark); 
+      border-radius: 4px; 
+      font-size: 0.95rem; 
+      background: var(--bg-input); 
+      color: var(--text-main); 
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 2px rgba(254, 218, 21, 0.2);
+    }
+
+    button { 
+      background: var(--accent-red); 
+      color: #fff; 
+      padding: 0.8rem 1.8rem; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      margin-right: 0.6rem; 
+      transition: background 0.2s;
+    }
+    button:hover { background: #7a1a29; }
+    
+    .copy-btn { background: var(--accent-gold); color: #121212; font-weight: 700; }
+    .copy-btn:hover { background: #e6c400; }
+    
+    .note { font-size: 0.85rem; color: #888; margin-top: 0.5rem; font-style: italic; }
+    
+    #cc-preview { 
+      margin-top: 1rem; 
+      padding: 0.8rem; 
+      background: var(--bg-input); 
+      border-radius: 4px; 
+      font-family: monospace; 
+      font-size: 0.9rem; 
+      line-height: 1.5;
+      color: var(--accent-gold);
+      border: 1px dashed var(--border-dark);
+    }
+    #to-preview { color: var(--text-main); }
+
+    textarea { 
+      width: 100%; 
+      min-height: 280px; 
+      font-family: 'Consolas', monospace; 
+      background: var(--bg-input); 
+      color: var(--text-main);
+      border: 1px solid var(--border-dark); 
+      padding: 1rem; 
+      border-radius: 4px; 
+      margin-top: 1rem; 
+      font-size: 0.95rem; 
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔧 Chromebook Repair Email Generator</h2>
+  
+  <div class="section">
+    <h3>📦 Repair Details</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Student Full Name</label><input type="text" id="studentName" placeholder="e.g., Jane Smith"></div>
+      <div class="form-group"><label>Issue/Damage</label><input type="text" id="issue" placeholder="e.g., Cracked Screen"></div>
+      <div class="form-group"><label>Parts Replaced</label><input type="text" id="parts" placeholder="e.g., Replaced LCD, top cover, webcam, bezel"></div>
+      <div class="form-group"><label>Service Date</label><input type="date" id="serviceDate"></div>
+      <div class="form-group"><label>Repair Fee</label><input type="text" id="fee" placeholder="e.g., $25.00"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>👨‍👩‍👧 Parent/Guardian Info</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Parent 1 First Name</label><input type="text" id="p1First"></div>
+      <div class="form-group"><label>Parent 1 Last Name</label><input type="text" id="p1Last"></div>
+      <div class="form-group"><label>Parent 1 Email</label><input type="email" id="p1Email" placeholder="parent1@district.edu"></div>
+      <div class="form-group"><label>Parent 2 First Name (Optional)</label><input type="text" id="p2First"></div>
+      <div class="form-group"><label>Parent 2 Last Name (Optional)</label><input type="text" id="p2Last"></div>
+      <div class="form-group"><label>Parent 2 Email (Optional)</label><input type="email" id="p2Email" placeholder="parent2@district.edu"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>🏫 Auto-CC Routing</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Student Grade</label>
+        <select id="grade" onchange="updateCCs()">
+          <option value="6">6th Grade</option>
+          <option value="7">7th Grade</option>
+          <option value="8">8th Grade</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Student Team</label>
+        <select id="team" onchange="updateCCs()">
+          <option value="1">Team 1</option>
+          <option value="2">Team 2</option>
+          <option value="3">Team 3</option>
+        </select>
+      </div>
+    </div>
+    <div class="note">⚙️ Update the placeholder emails in the script section below to match your actual district addresses.</div>
+    <div id="cc-preview">
+      <strong>To:</strong> <span id="to-preview">parent1@district.edu</span><br>
+      <strong>CC:</strong> <span id="cc-preview-text">loading...</span>
+    </div>
+  </div>
+
+  <button onclick="generateEmail()">📧 Generate Email</button>
+  <button class="copy-btn" onclick="copyEmail()">📋 Copy to Clipboard</button>
+
+  <div class="section" id="output-section" style="display:none; border-left-color: var(--accent-gold);">
+    <h3>📄 Ready-to-Send Email</h3>
+    <textarea id="email-body" readonly></textarea>
+  </div>
+
+  <script>
+    // 🔧 UPDATE THESE PLACEHOLDERS WITH YOUR ACTUAL DISTRICT EMAILS
+    const CONFIG = {
+      secretaries: ["sec1@district.edu", "sec2@district.edu"],
+      counselors: { 
+        "6": "counselor6@district.edu", 
+        "7": "counselor7@district.edu", 
+        "8": "counselor8@district.edu" 
+      },
+      teamLeaders: {
+        "6": { "1": "lead6-1@district.edu", "2": "lead6-2@district.edu", "3": "lead6-3@district.edu" },
+        "7": { "1": "lead7-1@district.edu", "2": "lead7-2@district.edu", "3": "lead7-3@district.edu" },
+        "8": { "1": "lead8-1@district.edu", "2": "lead8-2@district.edu", "3": "lead8-3@district.edu" }
+      }
+    };
+
+    function updateCCs() {
+      const grade = document.getElementById('grade').value;
+      const team = document.getElementById('team').value;
+      const leader = CONFIG.teamLeaders[grade]?.[team] || "lead-unknown@district.edu";
+      const counselor = CONFIG.counselors[grade] || "counselor-unknown@district.edu";
+      const ccList = [...CONFIG.secretaries, leader, counselor];
+      document.getElementById('cc-preview-text').textContent = ccList.join(", ");
+    }
+
+    function generateEmail() {
+      const student = document.getElementById('studentName').value || "[Student Name]";
+      const issue = document.getElementById('issue').value || "[Issue]";
+      const parts = document.getElementById('parts').value || "[Parts Replaced]";
+      const date = document.getElementById('serviceDate').value || new Date().toLocaleDateString();
+      const fee = document.getElementById('fee').value || "[Fee]";
+
+      const p1First = document.getElementById('p1First').value || "Parent";
+      const p1Email = document.getElementById('p1Email').value || "parent1@district.edu";
+      const p2First = document.getElementById('p2First').value;
+      const p2Email = document.getElementById('p2Email').value;
+
+      const grade = document.getElementById('grade').value;
+      const team = document.getElementById('team').value;
+      const leader = CONFIG.teamLeaders[grade]?.[team] || "";
+      const counselor = CONFIG.counselors[grade] || "";
+      const ccList = [...CONFIG.secretaries, leader, counselor].filter(Boolean).join(", ");
+
+      const toList = p2Email ? `${p1Email}, ${p2Email}` : p1Email;
+      const greeting = p2First ? `${p1First} and ${p2First}` : p1First;
+
+      const emailText = `To: ${toList}
+CC: ${ccList}
+Subject: ${student} Chromebook is Repaired - Fee for ${fee}
+
+Dear ${greeting},
+
+I hope this email finds you well. We are pleased to inform you that ${student}'s Chromebook has been successfully repaired and is now ready for pickup.
+
+Here is a summary of the service provided:
+
+Issue: ${issue}
+Repairs conducted: ${parts}
+Service Date: ${date}
+Total Repair Fee: ${fee}
+
+You can settle the fee by visiting our front office to make a payment with cash or a check payable to School District Name.
+
+If you have any questions or concerns regarding the repair or the fee, please do not hesitate to reach out to me at 555-555-5555 or reply to this email.
+
+Warm regards,
+Mike McKinney
+Technology Assistant`;
+
+      document.getElementById('email-body').value = emailText;
+      document.getElementById('output-section').style.display = 'block';
+      document.getElementById('to-preview').textContent = toList;
+    }
+
+    function copyEmail() {
+      const textarea = document.getElementById('email-body');
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        alert("✅ Email copied! Paste directly into Outlook/Teams email fields.");
+      }).catch(() => {
+        document.execCommand('copy');
+        alert("✅ Copied using fallback method.");
+      });
+    }
+
+    window.onload = updateCCs;
+  </script>
+</body>
+</html>
