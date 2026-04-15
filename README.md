@@ -1,23 +1,24 @@
 # 🔧 Chromebook Repair Email Generator
 
-A lightweight, zero-dependency HTML tool designed to automate and standardize Chromebook repair notification emails for school IT departments.
+A lightweight, zero-dependency HTML tool that automates and standardizes Chromebook repair notification emails for school IT departments. Built to replace repetitive copy-pasting, ensure accurate staff/parent routing, and maintain consistent district communication.
 
 ## ✨ Features
-- 🌙 **Dark Mode UI** with district-branded accent colors (`#9a2234` Red & `#feda15` Gold)
-- 📧 **Auto-CC Routing** based on student grade and team (secretaries, team leaders, counselors)
-- 👨‍👩‍👧 **Multi-Parent Support** with automatic greeting generation
-- 📋 **One-Click Clipboard** for instant pasting into Outlook, Teams, or Gmail
-- 🌐 **100% Offline** - No servers, APIs, or installations required. Runs locally in any modern browser.
+- 🌗 **Persistent Dark/Light Mode** – Toggle fixed to the top-right, preference saved via `localStorage`
+- 📤 **One-Click Gmail Integration** – Opens a pre-filled compose window (`To`, `CC`, `Subject`, `Body`)
+- 🏫 **Smart Auto-CC Routing** – Dynamically routes emails based on student grade & team (secretaries, team leaders, counselors)
+- 💰 **Flexible Fee Selector** – Dropdown for `$25.00`, `$80.00`, or custom amount (auto-formats to `$XX.XX`)
+- 🔩 **Multi-Part Selector** – Tag-style checkboxes for standard Chromebook components + custom "Other" field
+- 📋 **Granular Copy Controls** – Copy individual fields or the entire email payload instantly
+- 🌐 **100% Offline & Zero Dependencies** – No servers, APIs, frameworks, or installations required. Runs locally in any modern browser.
 
 ## 🚀 Quick Start
 1. Download or clone this repository.
-2. Open `Chromebook_Email_Generator.html` (or rename to `index.html` for GitHub Pages) in any web browser.
+2. Open `Chromebook_Email_Generator.html` in any web browser (Chrome, Edge, Firefox, Safari).
 3. Open the file in a text editor and update the `CONFIG` object with your district's actual email addresses.
-4. Fill out the form, click **Generate Email**, then **Copy to Clipboard**.
-5. Paste directly into your email client and send.
+4. Fill out the form → click **📤 Open in Gmail** → review → send.
 
 ## ⚙️ Configuration
-Locate the `const CONFIG = { ... }` block near the bottom of the HTML file and update it with your school's routing logic:
+Locate the `const CONFIG = { ... }` block in the `<script>` section and update it to match your school's routing logic:
 ```javascript
 const CONFIG = {
   secretaries: ["sec1@district.edu", "sec2@district.edu"],
