@@ -6,6 +6,7 @@
   <title>Chromebook Repair Email Generator</title>
   <style>
     :root {
+      /* Dark Mode Defaults */
       --bg-main: #121212;
       --bg-card: #1e1e1e;
       --bg-input: #2a2a2a;
@@ -14,14 +15,34 @@
       --accent-red: #9a2234;
       --accent-gold: #feda15;
       --border-dark: #444;
+      --success: #28a745;
+      --toggle-track: #444;
+      --toggle-thumb: #feda15;
     }
+
+    .light-mode {
+      --bg-main: #f5f7fa;
+      --bg-card: #ffffff;
+      --bg-input: #ffffff;
+      --text-main: #1a1a1a;
+      --text-muted: #666666;
+      --accent-red: #9a2234;
+      --accent-gold: #c5a000; /* Darker gold for better contrast on white */
+      --border-dark: #d0d0d0;
+      --success: #28a745;
+      --toggle-track: #d0d0d0;
+      --toggle-thumb: #9a2234;
+    }
+
+    * { box-sizing: border-box; }
     body { 
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; 
       max-width: 950px; 
       margin: 2rem auto; 
-      padding: 0 1rem; 
+      padding: 1rem; 
       background: var(--bg-main); 
       color: var(--text-main); 
+      transition: background 0.3s, color 0.3s;
     }
     h2 { 
       color: var(--accent-gold); 
@@ -37,8 +58,9 @@
       padding: 1.5rem; 
       border-radius: 8px; 
       margin-bottom: 1.5rem; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
       border-left: 5px solid var(--accent-red);
+      transition: background 0.3s, box-shadow 0.3s;
     }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.2rem; }
     .form-group { display: flex; flex-direction: column; }
@@ -51,7 +73,7 @@
       font-size: 0.95rem; 
       background: var(--bg-input); 
       color: var(--text-main); 
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.3s;
     }
     input:focus, select:focus {
       outline: none;
@@ -59,24 +81,26 @@
       box-shadow: 0 0 0 2px rgba(254, 218, 21, 0.2);
     }
 
-    button { 
+    .btn { 
       background: var(--accent-red); 
       color: #fff; 
-      padding: 0.8rem 1.8rem; 
+      padding: 0.8rem 1.5rem; 
       border: none; 
       border-radius: 4px; 
       cursor: pointer; 
       font-size: 1rem; 
       font-weight: 600; 
       margin-right: 0.6rem; 
+      margin-top: 0.5rem;
       transition: background 0.2s;
     }
-    button:hover { background: #7a1a29; }
+    .btn:hover { background: #7a1a29; }
+    .btn-gmail { background: #4285F4; color: #fff; }
+    .btn-gmail:hover { background: #3367D6; }
+    .btn-copy { background: var(--accent-gold); color: #121212; font-weight: 700; }
+    .btn-copy:hover { background: #e6c400; }
     
-    .copy-btn { background: var(--accent-gold); color: #121212; font-weight: 700; }
-    .copy-btn:hover { background: #e6c400; }
-    
-    .note { font-size: 0.85rem; color: #888; margin-top: 0.5rem; font-style: italic; }
+    .note { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; font-style: italic; }
     
     #cc-preview { 
       margin-top: 1rem; 
@@ -88,12 +112,19 @@
       line-height: 1.5;
       color: var(--accent-gold);
       border: 1px dashed var(--border-dark);
+      transition: background 0.3s, color 0.3s;
     }
     #to-preview { color: var(--text-main); }
 
+    .output-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+    .output-label { width: 70px; font-weight: 600; color: var(--text-muted); }
+    .output-value { flex: 1; background: var(--bg-input); padding: 0.5rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; color: var(--text-main); transition: background 0.3s; }
+    .mini-copy { background: #444; color: #fff; padding: 0.3rem 0.6rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: background 0.2s; }
+    .mini-copy:hover { background: #555; }
+
     textarea { 
       width: 100%; 
-      min-height: 280px; 
+      min-height: 200px; 
       font-family: 'Consolas', monospace; 
       background: var(--bg-input); 
       color: var(--text-main);
@@ -103,10 +134,89 @@
       margin-top: 1rem; 
       font-size: 0.95rem; 
       box-sizing: border-box;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    /* Part Selector Styles */
+    .parts-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    .part-tag { position: relative; }
+    .part-tag input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+    .part-tag label {
+      display: inline-block;
+      background: var(--bg-input);
+      border: 1px solid var(--border-dark);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: normal;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .part-tag input:checked + label {
+      background: var(--accent-red);
+      color: #fff;
+      border-color: var(--accent-red);
+      box-shadow: 0 0 0 2px rgba(154, 34, 52, 0.3);
+    }
+    .part-tag input:hover + label { border-color: var(--accent-gold); }
+    #selected-parts-preview { font-family: monospace; color: var(--accent-gold); margin-top: 0.5rem; }
+
+    /* Theme Toggle Styles */
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--bg-card);
+      padding: 0.5rem 0.9rem;
+      border-radius: 24px;
+      border: 1px solid var(--border-dark);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s;
+    }
+    .theme-toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    #theme-label { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .toggle-track {
+      width: 44px;
+      height: 24px;
+      background: var(--toggle-track);
+      border-radius: 12px;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .toggle-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--toggle-thumb);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), background 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .light-mode .toggle-thumb { transform: translateX(20px); background: var(--accent-gold); }
+    .light-mode .toggle-track { background: #d4d4d4; }
+
+    @media (max-width: 600px) {
+      .theme-toggle { top: 0.5rem; right: 0.5rem; padding: 0.4rem 0.7rem; }
+      body { margin: 1rem auto; padding: 0.5rem; }
     }
   </style>
 </head>
 <body>
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" onclick="toggleTheme()" title="Switch Theme">
+    <span id="theme-label">🌙 Dark</span>
+    <div class="toggle-track"><div class="toggle-thumb"></div></div>
+  </div>
+
   <h2>🔧 Chromebook Repair Email Generator</h2>
   
   <div class="section">
@@ -114,9 +224,17 @@
     <div class="form-grid">
       <div class="form-group"><label>Student Full Name</label><input type="text" id="studentName" placeholder="e.g., Jane Smith"></div>
       <div class="form-group"><label>Issue/Damage</label><input type="text" id="issue" placeholder="e.g., Cracked Screen"></div>
-      <div class="form-group"><label>Parts Replaced</label><input type="text" id="parts" placeholder="e.g., Replaced LCD, top cover, webcam, bezel"></div>
       <div class="form-group"><label>Service Date</label><input type="date" id="serviceDate"></div>
-      <div class="form-group"><label>Repair Fee</label><input type="text" id="fee" placeholder="e.g., $25.00"></div>
+      
+      <div class="form-group">
+        <label>Repair Fee</label>
+        <select id="feeType" onchange="toggleFeeInput()">
+          <option value="25.00">$25.00 (Minor/Standard)</option>
+          <option value="80.00">$80.00 (Major)</option>
+          <option value="other">Other (Custom Amount)</option>
+        </select>
+        <input type="number" id="customFee" placeholder="Enter amount (e.g., 45)" style="display:none; margin-top: 0.5rem;" step="0.01" min="0">
+      </div>
     </div>
   </div>
 
@@ -130,6 +248,20 @@
       <div class="form-group"><label>Parent 2 Last Name (Optional)</label><input type="text" id="p2Last"></div>
       <div class="form-group"><label>Parent 2 Email (Optional)</label><input type="email" id="p2Email" placeholder="parent2@district.edu"></div>
     </div>
+  </div>
+
+  <div class="section">
+    <h3>🔩 Parts Replaced</h3>
+    <p class="note">Select all that apply:</p>
+    <div class="parts-grid" id="parts-container"></div>
+    <div style="margin-top: 0.5rem;">
+      <div class="part-tag">
+        <input type="checkbox" id="part-other-check" onchange="toggleOtherPart()">
+        <label for="part-other-check">Other (specify below)</label>
+      </div>
+      <input type="text" id="other-part-input" placeholder="e.g., Power button, Fan, Hinge bracket" style="display:none; margin-top: 0.5rem; width: 100%;">
+    </div>
+    <div id="selected-parts-preview">Selected: None</div>
   </div>
 
   <div class="section">
@@ -150,23 +282,33 @@
         </select>
       </div>
     </div>
-    <div class="note">⚙️ Update the placeholder emails in the script section below to match your actual district addresses.</div>
+    <div class="note">⚙️ Update the `CONFIG` object in the script to match your district emails.</div>
     <div id="cc-preview">
       <strong>To:</strong> <span id="to-preview">parent1@district.edu</span><br>
       <strong>CC:</strong> <span id="cc-preview-text">loading...</span>
     </div>
   </div>
 
-  <button onclick="generateEmail()">📧 Generate Email</button>
-  <button class="copy-btn" onclick="copyEmail()">📋 Copy to Clipboard</button>
+  <button class="btn btn-gmail" onclick="openInGmail()">📤 Open in Gmail</button>
+  <button class="btn" onclick="generateEmail()">📧 Generate Preview</button>
+  <button class="btn btn-copy" onclick="copyAll()">📋 Copy All to Clipboard</button>
 
   <div class="section" id="output-section" style="display:none; border-left-color: var(--accent-gold);">
-    <h3>📄 Ready-to-Send Email</h3>
+    <h3>📄 Email Fields</h3>
+    <div class="output-row"><span class="output-label">To:</span><span class="output-value" id="out-to"></span><button class="mini-copy" onclick="copyField('out-to')">Copy</button></div>
+    <div class="output-row"><span class="output-label">CC:</span><span class="output-value" id="out-cc"></span><button class="mini-copy" onclick="copyField('out-cc')">Copy</button></div>
+    <div class="output-row"><span class="output-label">Subject:</span><span class="output-value" id="out-subject"></span><button class="mini-copy" onclick="copyField('out-subject')">Copy</button></div>
+    <h4 style="margin-top:1rem; color:var(--text-muted);">Body:</h4>
     <textarea id="email-body" readonly></textarea>
   </div>
 
   <script>
-    // 🔧 UPDATE THESE PLACEHOLDERS WITH YOUR ACTUAL DISTRICT EMAILS
+    const PARTS_LIST = [
+      "Screen", "Bezel", "LCD Cover", "L Hinge", "R Hinge", "Bottom Casing", 
+      "Battery", "Mainboard", "Keyboard", "Keyboard Palmrest", "Trackpad", 
+      "Trackpad Cable", "USB Board", "USB Board Cables", "Wifi Antenna", "LCD Cable", "Webcam"
+    ];
+
     const CONFIG = {
       secretaries: ["sec1@district.edu", "sec2@district.edu"],
       counselors: { 
@@ -181,6 +323,123 @@
       }
     };
 
+    // Theme Toggle Logic
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light') document.body.classList.add('light-mode');
+      updateThemeLabel();
+    }
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      updateThemeLabel();
+    }
+    function updateThemeLabel() {
+      document.getElementById('theme-label').textContent = document.body.classList.contains('light-mode') ? '☀️ Light' : '🌙 Dark';
+    }
+
+    // Parts Grid Init
+    function initPartsGrid() {
+      const container = document.getElementById('parts-container');
+      PARTS_LIST.forEach(part => {
+        const id = `part-${part.toLowerCase().replace(/\s+/g, '-')}`;
+        container.innerHTML += `
+          <div class="part-tag">
+            <input type="checkbox" id="${id}" value="${part}" onchange="updatePartsPreview()">
+            <label for="${id}">${part}</label>
+          </div>
+        `;
+      });
+    }
+
+    function toggleFeeInput() {
+      const type = document.getElementById('feeType').value;
+      document.getElementById('customFee').style.display = type === 'other' ? 'block' : 'none';
+      if (type !== 'other') document.getElementById('customFee').value = '';
+    }
+
+    function toggleOtherPart() {
+      const checked = document.getElementById('part-other-check').checked;
+      document.getElementById('other-part-input').style.display = checked ? 'block' : 'none';
+      if (!checked) document.getElementById('other-part-input').value = '';
+      updatePartsPreview();
+    }
+
+    function getSelectedParts() {
+      const checked = document.querySelectorAll('.parts-grid input[type="checkbox"]:checked');
+      let parts = Array.from(checked).map(cb => cb.value);
+      if (document.getElementById('part-other-check').checked) {
+        const custom = document.getElementById('other-part-input').value.trim();
+        if (custom) parts.push(custom);
+      }
+      return parts;
+    }
+
+    function updatePartsPreview() {
+      const parts = getSelectedParts();
+      document.getElementById('selected-parts-preview').textContent = parts.length ? `Selected: ${parts.join(', ')}` : 'Selected: None';
+    }
+
+    function formatCurrency(amount) {
+      const num = parseFloat(amount);
+      return isNaN(num) ? '$0.00' : `$${num.toFixed(2)}`;
+    }
+
+    function getEmailData() {
+      const student = document.getElementById('studentName').value || "[Student Name]";
+      const issue = document.getElementById('issue').value || "[Issue]";
+      const parts = getSelectedParts().join(', ') || "[Parts Replaced]";
+      const date = document.getElementById('serviceDate').value || new Date().toLocaleDateString();
+      
+      const feeType = document.getElementById('feeType').value;
+      const fee = feeType === 'other' ? formatCurrency(document.getElementById('customFee').value) : `$${feeType}`;
+
+      const p1First = document.getElementById('p1First').value || "Parent";
+      const p1Email = document.getElementById('p1Email').value || "";
+      const p2First = document.getElementById('p2First').value;
+      const p2Email = document.getElementById('p2Email').value || "";
+
+      const grade = document.getElementById('grade').value;
+      const team = document.getElementById('team').value;
+      const leader = CONFIG.teamLeaders[grade]?.[team] || "";
+      const counselor = CONFIG.counselors[grade] || "";
+      const ccList = [...CONFIG.secretaries, leader, counselor].filter(Boolean).join(",");
+      const toList = [p1Email, p2Email].filter(Boolean).join(",");
+      const greeting = p2First ? `${p1First} and ${p2First}` : p1First;
+
+      const subject = `${student} Chromebook is Repaired - Fee for ${fee}`;
+      const body = `Dear ${greeting},\n\nI hope this email finds you well. We are pleased to inform you that ${student}'s Chromebook has been successfully repaired and is now ready for pickup.\n\nHere is a summary of the service provided:\n\nIssue: ${issue}\nRepairs conducted: Replaced ${parts}\nService Date: ${date}\nTotal Repair Fee: ${fee}\n\nYou can settle the fee by visiting our front office to make a payment with cash or a check payable to School District Name.\n\nIf you have any questions or concerns regarding the repair or the fee, please do not hesitate to reach out to me at 555-555-5555 or reply to this email.\n\nWarm regards,\nRepairTech Name\nRepair Tech Title`;
+
+      return { toList, ccList, subject, body, fee, parts };
+    }
+
+    function openInGmail() {
+      const { toList, ccList, subject, body } = getEmailData();
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(toList)}&cc=${encodeURIComponent(ccList)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(gmailUrl, '_blank');
+    }
+
+    function generateEmail() {
+      const { toList, ccList, subject, body } = getEmailData();
+      document.getElementById('out-to').textContent = toList || "No emails entered";
+      document.getElementById('out-cc').textContent = ccList;
+      document.getElementById('out-subject').textContent = subject;
+      document.getElementById('email-body').value = body;
+      document.getElementById('output-section').style.display = 'block';
+    }
+
+    function copyAll() {
+      const { toList, ccList, subject, body } = getEmailData();
+      const fullText = `To: ${toList}\nCC: ${ccList}\nSubject: ${subject}\n\n${body}`;
+      navigator.clipboard.writeText(fullText).then(() => alert("✅ All fields copied! Paste into your email client."));
+    }
+
+    function copyField(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => alert("✅ Copied!"));
+    }
+
     function updateCCs() {
       const grade = document.getElementById('grade').value;
       const team = document.getElementById('team').value;
@@ -190,67 +449,12 @@
       document.getElementById('cc-preview-text').textContent = ccList.join(", ");
     }
 
-    function generateEmail() {
-      const student = document.getElementById('studentName').value || "[Student Name]";
-      const issue = document.getElementById('issue').value || "[Issue]";
-      const parts = document.getElementById('parts').value || "[Parts Replaced]";
-      const date = document.getElementById('serviceDate').value || new Date().toLocaleDateString();
-      const fee = document.getElementById('fee').value || "[Fee]";
-
-      const p1First = document.getElementById('p1First').value || "Parent";
-      const p1Email = document.getElementById('p1Email').value || "parent1@district.edu";
-      const p2First = document.getElementById('p2First').value;
-      const p2Email = document.getElementById('p2Email').value;
-
-      const grade = document.getElementById('grade').value;
-      const team = document.getElementById('team').value;
-      const leader = CONFIG.teamLeaders[grade]?.[team] || "";
-      const counselor = CONFIG.counselors[grade] || "";
-      const ccList = [...CONFIG.secretaries, leader, counselor].filter(Boolean).join(", ");
-
-      const toList = p2Email ? `${p1Email}, ${p2Email}` : p1Email;
-      const greeting = p2First ? `${p1First} and ${p2First}` : p1First;
-
-      const emailText = `To: ${toList}
-CC: ${ccList}
-Subject: ${student} Chromebook is Repaired - Fee for ${fee}
-
-Dear ${greeting},
-
-I hope this email finds you well. We are pleased to inform you that ${student}'s Chromebook has been successfully repaired and is now ready for pickup.
-
-Here is a summary of the service provided:
-
-Issue: ${issue}
-Repairs conducted: ${parts}
-Service Date: ${date}
-Total Repair Fee: ${fee}
-
-You can settle the fee by visiting our front office to make a payment with cash or a check payable to School District Name.
-
-If you have any questions or concerns regarding the repair or the fee, please do not hesitate to reach out to me at 555-555-5555 or reply to this email.
-
-Warm regards,
-Mike McKinney
-Technology Assistant`;
-
-      document.getElementById('email-body').value = emailText;
-      document.getElementById('output-section').style.display = 'block';
-      document.getElementById('to-preview').textContent = toList;
-    }
-
-    function copyEmail() {
-      const textarea = document.getElementById('email-body');
-      textarea.select();
-      navigator.clipboard.writeText(textarea.value).then(() => {
-        alert("✅ Email copied! Paste directly into Outlook/Teams email fields.");
-      }).catch(() => {
-        document.execCommand('copy');
-        alert("✅ Copied using fallback method.");
-      });
-    }
-
-    window.onload = updateCCs;
+    window.onload = () => {
+      initTheme();
+      initPartsGrid();
+      updateCCs();
+      updatePartsPreview();
+    };
   </script>
 </body>
 </html>
